@@ -5,18 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-export interface Transaction {
-  id: string;
-  data_vencimento: string;
-  descricao: string;
-  observacao: string;
-  categoria: string;
-  tipo: string;
-  valor: number;
-  status: string;
-  codigo_barras: string;
-}
+import { type Transaction } from "@/hooks/useTransactions";
 
 interface TransactionTableProps {
   transactions: Transaction[];

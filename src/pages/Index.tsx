@@ -1,52 +1,22 @@
 import { useState, useMemo } from "react";
-import { Plus, Download } from "lucide-react";
+import { Plus, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import ExpenseCard from "@/components/ExpenseCard";
 import TransactionFilters from "@/components/TransactionFilters";
-import TransactionTable, { Transaction } from "@/components/TransactionTable";
+import TransactionTable from "@/components/TransactionTable";
 import TransactionForm from "@/components/TransactionForm";
 import DeleteConfirmation from "@/components/DeleteConfirmation";
+import { useTransactions, type Transaction } from "@/hooks/useTransactions";
 
 const Index = () => {
-  const { toast } = useToast();
-  
-  // Mock data with the provided transactions
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    {
-      id: "1",
-      data_vencimento: "2025-09-19",
-      descricao: "Loja",
-      observacao: "inss Ricardo",
-      categoria: "Custo Fixo",
-      tipo: "Saida",
-      valor: 334,
-      status: "Aberto",
-      codigo_barras: "858700000030339603852526620716252417348212035901"
-    },
-    {
-      id: "2",
-      data_vencimento: "2025-09-06",
-      descricao: "Casa",
-      observacao: "internet Caxias On-Line",
-      categoria: "Custo Fixo",
-      tipo: "Saida",
-      valor: 90,
-      status: "Fechado",
-      codigo_barras: "74891125372870230728233756661089511950000009999"
-    },
-    {
-      id: "3",
-      data_vencimento: "2025-09-01",
-      descricao: "Casa",
-      observacao: "Ampla Saracuruna",
-      categoria: "Custo Fixo",
-      tipo: "Saida",
-      valor: 97,
-      status: "Fechado",
-      codigo_barras: "23792373049037000309840014860007111920000009767"
-    }
-  ]);
+  const {
+    transactions,
+    isLoading,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    markAsPaid
+  } = useTransactions();
 
   // Get current month's first and last day
   const getCurrentMonthDates = () => {
@@ -130,18 +100,7 @@ const Index = () => {
   };
 
   const handleMarkAsPaid = (id: string) => {
-    setTransactions(prev => 
-      prev.map(transaction => 
-        transaction.id === id 
-          ? { ...transaction, status: "Fechado" }
-          : transaction
-      )
-    );
-    
-    toast({
-      title: "Status Atualizado",
-      description: "Lançamento marcado como fechado",
-    });
+    markAsPaid(id);
   };
 
   const handleNewTransaction = () => {
@@ -149,51 +108,31 @@ const Index = () => {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = (data: Omit<Transaction, 'id'>) => {
-    if (editingTransaction) {
-      // Edit existing transaction
-      setTransactions(prev => 
-        prev.map(transaction => 
-          transaction.id === editingTransaction.id 
-            ? { ...transaction, ...data }
-            : transaction
-        )
-      );
-      
-      toast({
-        title: "Lançamento Atualizado",
-        description: "As alterações foram salvas com sucesso",
-      });
-    } else {
-      // Add new transaction
-      const newTransaction: Transaction = {
-        ...data,
-        id: Date.now().toString(), // Simple ID generation
-      };
-      
-      setTransactions(prev => [newTransaction, ...prev]);
-      
-      toast({
-        title: "Novo Lançamento",
-        description: "Lançamento criado com sucesso",
-      });
+  const handleFormSubmit = async (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      if (editingTransaction) {
+        await updateTransaction(editingTransaction.id, data);
+      } else {
+        await addTransaction(data);
+      }
+      setIsFormOpen(false);
+      setEditingTransaction(null);
+    } catch (error) {
+      // Error handling is done in the hook
+      console.error('Error submitting form:', error);
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingTransaction) {
-      setTransactions(prev => 
-        prev.filter(transaction => transaction.id !== deletingTransaction.id)
-      );
-      
-      toast({
-        title: "Lançamento Excluído",
-        description: "O lançamento foi removido permanentemente",
-        variant: "destructive",
-      });
-      
-      setDeletingTransaction(null);
-      setIsDeleteDialogOpen(false);
+      try {
+        await deleteTransaction(deletingTransaction.id);
+        setDeletingTransaction(null);
+        setIsDeleteDialogOpen(false);
+      } catch (error) {
+        // Error handling is done in the hook
+        console.error('Error deleting transaction:', error);
+      }
     }
   };
 
@@ -209,11 +148,6 @@ const Index = () => {
     a.href = url;
     a.download = `lancamentos_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-    
-    toast({
-      title: "Exportar CSV",
-      description: "Download iniciado com sucesso",
-    });
   };
 
   const formatCurrency = (value: number) => {
@@ -222,6 +156,17 @@ const Index = () => {
       currency: 'BRL'
     }).format(value);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="text-muted-foreground">Carregando lançamentos...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -234,7 +179,7 @@ const Index = () => {
               <p className="text-muted-foreground text-sm sm:text-base">Gerencie suas receitas e despesas</p>
               <div className="flex items-center gap-1">
                 <div className="h-2 w-2 rounded-full bg-success"></div>
-                <span className="text-xs text-muted-foreground">Conectado</span>
+                <span className="text-xs text-muted-foreground">Conectado ao Supabase</span>
               </div>
             </div>
           </div>

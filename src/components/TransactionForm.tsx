@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Transaction } from "./TransactionTable";
+import { type Transaction } from "@/hooks/useTransactions";
 
 const formSchema = z.object({
   data_vencimento: z.date({
