@@ -61,10 +61,8 @@ const Index = () => {
       const matchesType = typeFilter === "all" || transaction.tipo === typeFilter;
       const matchesStatus = statusFilter === "all" || transaction.status === statusFilter;
       
-      // Parse dates as local dates to avoid timezone issues
-      const [year, month, day] = transaction.data_vencimento.split('-').map(Number);
-      const transactionDate = new Date(year, month - 1, day);
-      
+      // Parse dates without timezone conversion
+      const transactionDate = new Date(transaction.data_vencimento + 'T12:00:00');
       const startDateObj = new Date(startDate + 'T00:00:00');
       const endDateObj = new Date(endDate + 'T23:59:59');
       
