@@ -6,6 +6,7 @@ import TransactionFilters from "@/components/TransactionFilters";
 import TransactionTable from "@/components/TransactionTable";
 import TransactionForm from "@/components/TransactionForm";
 import DeleteConfirmation from "@/components/DeleteConfirmation";
+import Logo from "@/components/Logo";
 import { useTransactions, type Transaction } from "@/hooks/useTransactions";
 
 const Index = () => {
@@ -175,6 +176,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Logo Header */}
+        <div className="pb-8">
+          <Logo />
+        </div>
+        
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
           <div className="mb-4 sm:mb-0">
