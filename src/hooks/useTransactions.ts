@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { supabase, type FinanceiroLancamento } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
+import type { Database } from '@/integrations/supabase/types'
 import { useToast } from '@/hooks/use-toast'
 
+type FinanceiroLancamento = Database['public']['Tables']['financeiro_lancamentos']['Row']
 export type Transaction = FinanceiroLancamento
 
 export const useTransactions = () => {
@@ -36,9 +38,14 @@ export const useTransactions = () => {
 
   const addTransaction = async (transactionData: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      const insertData = {
+        ...transactionData,
+        id: crypto.randomUUID()
+      };
+      
       const { data, error } = await supabase
         .from('financeiro_lancamentos')
-        .insert([transactionData])
+        .insert([insertData])
         .select()
         .single()
 
