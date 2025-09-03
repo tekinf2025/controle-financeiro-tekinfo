@@ -33,7 +33,7 @@ interface TransactionFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   transaction?: Transaction | null;
-  onSubmit: (data: Omit<Transaction, 'id'>) => void;
+  onSubmit: (data: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => void;
 }
 
 const TransactionForm = ({ open, onOpenChange, transaction, onSubmit }: TransactionFormProps) => {

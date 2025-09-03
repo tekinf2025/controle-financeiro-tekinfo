@@ -38,11 +38,7 @@ export const useTransactions = () => {
     try {
       const { data, error } = await supabase
         .from('financeiro_lancamentos')
-        .insert([{
-          ...transactionData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
+        .insert([transactionData])
         .select()
         .single()
 
@@ -73,10 +69,7 @@ export const useTransactions = () => {
     try {
       const { data, error } = await supabase
         .from('financeiro_lancamentos')
-        .update({
-          ...transactionData,
-          updated_at: new Date().toISOString()
-        })
+        .update(transactionData)
         .eq('id', id)
         .select()
         .single()
@@ -144,8 +137,7 @@ export const useTransactions = () => {
       const { data, error } = await supabase
         .from('financeiro_lancamentos')
         .update({ 
-          status: 'Fechado',
-          updated_at: new Date().toISOString()
+          status: 'Fechado'
         })
         .eq('id', id)
         .select()
