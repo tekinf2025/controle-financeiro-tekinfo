@@ -61,10 +61,16 @@ const Index = () => {
       const matchesType = typeFilter === "all" || transaction.tipo === typeFilter;
       const matchesStatus = statusFilter === "all" || transaction.status === statusFilter;
       
-      const transactionDate = new Date(transaction.data_vencimento);
+      // Parse dates as local dates to avoid timezone issues
+      const [year, month, day] = transaction.data_vencimento.split('-').map(Number);
+      const transactionDate = new Date(year, month - 1, day);
+      
+      const startDateObj = new Date(startDate + 'T00:00:00');
+      const endDateObj = new Date(endDate + 'T23:59:59');
+      
       const matchesDateRange = 
-        transactionDate >= new Date(startDate) && 
-        transactionDate <= new Date(endDate);
+        transactionDate >= startDateObj && 
+        transactionDate <= endDateObj;
 
       return matchesSearch && matchesCategory && matchesType && matchesStatus && matchesDateRange;
     });

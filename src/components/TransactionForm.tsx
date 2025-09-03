@@ -56,8 +56,12 @@ const TransactionForm = ({ open, onOpenChange, transaction, onSubmit }: Transact
   // Reset form when transaction changes
   useEffect(() => {
     if (transaction) {
+      // Parse date as local date to avoid timezone issues
+      const [year, month, day] = transaction.data_vencimento.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+      
       form.reset({
-        data_vencimento: new Date(transaction.data_vencimento),
+        data_vencimento: localDate,
         descricao: transaction.descricao,
         observacao: transaction.observacao,
         categoria: transaction.categoria,
